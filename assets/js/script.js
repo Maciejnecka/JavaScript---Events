@@ -2,7 +2,7 @@ const init = function () {
   const imagesList = document.querySelectorAll('.gallery__item');
   imagesList.forEach((img) => {
     img.dataset.sliderGroupName = Math.random() > 0.5 ? 'nice' : 'good';
-  }); // za każdym przeładowaniem strony przydzielaj inną nazwę grupy dla zdjęcia
+  });
 
   runJSSlider();
 };
@@ -26,24 +26,14 @@ const initEvents = function (imagesList, sliderRootElement) {
       fireCustomEvent(e.currentTarget, 'js-slider-img-click');
     });
   });
-
-  // todo:
-  // utwórz nasłuchiwanie eventu o nazwie [click], który ma uruchomić event [js-slider-img-next]
-  // na elemencie [.js-slider__nav--next]
   const navNext = sliderRootElement.querySelector('.js-slider__nav--next');
   navNext.addEventListener('click', function (e) {
     fireCustomEvent(e.currentTarget, 'js-slider-img-next');
   });
-  // todo:
-  // utwórz nasłuchiwanie eventu o nazwie [click], który ma uruchomić event [js-slider-img-prev]
-  // na elemencie [.js-slider__nav--prev]
   const navPrev = sliderRootElement.querySelector('.js-slider__nav--prev');
   navPrev.addEventListener('click', function (e) {
     fireCustomEvent(e.currentTarget, 'js-slider-img-prev');
   });
-  // todo:
-  // utwórz nasłuchiwanie eventu o nazwie [click], który ma uruchomić event [js-slider-close]
-  // tylko wtedy, gdy użytkownik kliknie w [.js-slider__zoom]
   const zoom = sliderRootElement.querySelector('.js-slider__zoom');
   zoom.addEventListener('click', function (e) {
     if (e.target === zoom) {
@@ -54,11 +44,9 @@ const initEvents = function (imagesList, sliderRootElement) {
 
 const fireCustomEvent = function (element, name) {
   console.log(element.className, '=>', name);
-
   const event = new CustomEvent(name, {
     bubbles: true,
   });
-
   element.dispatchEvent(event);
 };
 
@@ -72,28 +60,20 @@ const initCustomEvents = function (
       onImageClick(event, sliderRootElement, imagesSelector);
     });
   });
-
   sliderRootElement.addEventListener('js-slider-img-next', onImageNext);
   sliderRootElement.addEventListener('js-slider-img-prev', onImagePrev);
   sliderRootElement.addEventListener('js-slider-close', onClose);
 };
 
 const onImageClick = function (event, sliderRootElement, imagesSelector) {
-  // todo:
-  // 1. dodać klasę [.js-slider--active], aby pokazać całą sekcję
   sliderRootElement.classList.add('js-slider--active');
-
-  // 2. wyszukać ściężkę (atrybut [src]) do klikniętego elementu i wstawić do [.js-slider__image]
   const sliderImage = sliderRootElement.querySelector('.js-slider__image');
-  const imageSrc = event.currentTarget.firstElementChild.getAttribute('src');
-  sliderImage.setAttribute('src', imageSrc);
-  // 3. pobrać nazwę grupy zapisaną w dataset klikniętego elementu
+  const clickedImage = event.currentTarget;
+  setImageSource(sliderImage, clickedImage);
   const groupName = event.currentTarget.dataset.sliderGroupName;
-  // 4. wyszukać wszystkie zdjęcia należące do danej grupy, które wykorzystasz do osadzenia w dolnym pasku
   const groupAllImages = document.querySelectorAll(
     `${imagesSelector}[data-slider-group-name=${groupName}]`
   );
-  // 5. utworzyć na podstawie elementu [.js-slider__thumbs-item--prototype] zawartość dla [.js-slider__thumbs]
   const thumbsContainer = sliderRootElement.querySelector('.js-slider__thumbs');
 
   groupAllImages.forEach(function (el) {
@@ -106,8 +86,6 @@ const onImageClick = function (event, sliderRootElement, imagesSelector) {
       thumbImg.setAttribute('src', imgSrc);
       thumbItem.appendChild(thumbImg);
       thumbsContainer.appendChild(thumbItem);
-
-      // 6. zaznaczyć przy pomocy klasy [.js-slider__thumbs-image--current], który element jest aktualnie wyświetlany
       const currentImg = sliderRootElement.querySelector('.js-slider__image');
       if (
         el.firstElementChild.getAttribute('src') ===
@@ -122,50 +100,25 @@ const onImageClick = function (event, sliderRootElement, imagesSelector) {
 
 const onImageNext = function (e) {
   console.log(this, 'onImageNext');
-  // [this] wskazuje na element [.js-slider]
-
-  // todo:
-  // 1. wyszukać aktualny wyświetlany element przy pomocy [.js-slider__thumbs-image--current]
   const currentImg = document.querySelector(
     '.js-slider__thumbs-image--current'
   );
-  // 2. znaleźć element następny do wyświetlenie względem drzewa DOM dla [.js-slider__thumbs]
   const nextEle = currentImg.parentElement.nextElementSibling;
   const parentElement = document.querySelector('.js-slider__thumbs');
   const firstChild = parentElement.firstElementChild;
   const firstPicture = firstChild.nextElementSibling;
-  // 3. sprawdzić czy ten element istnieje - jeśli nie to [.nextElementSibling] zwróci [null]
   if (!nextEle) {
-    // 4. przełączyć klasę [.js-slider__thumbs-image--current] do odpowiedniego elementu
-    currentImg.classList.remove('js-slider__thumbs-image--current');
-    firstPicture.firstElementChild.classList.add(
-      'js-slider__thumbs-image--current'
-    );
-    // 5. podmienić atrybut o nazwie [src] dla [.js-slider__image]
-    const firstImgSrc = firstPicture.firstElementChild.getAttribute('src');
-    document
-      .querySelector('.js-slider__image')
-      .setAttribute('src', firstImgSrc);
+    setThumbsImageAsCurrent(firstPicture.firstElementChild);
   } else {
     const nextImg = nextEle.firstElementChild;
-    currentImg.classList.remove('js-slider__thumbs-image--current');
-    nextImg.classList.add('js-slider__thumbs-image--current');
-    const nextImageSrc = nextImg.getAttribute('src');
-    document
-      .querySelector('.js-slider__image')
-      .setAttribute('src', nextImageSrc);
+    setThumbsImageAsCurrent(nextImg);
   }
 };
 
 const onImagePrev = function () {
   console.log(this, 'onImagePrev');
-  // [this] wskazuje na element [.js-slider]
-  // todo:
-  // 1. wyszukać aktualny wyświetlany element przy pomocy [.js-slider__thumbs-image--current]
   const currentImg = this.querySelector('.js-slider__thumbs-image--current');
-  // 2. znaleźć element poprzedni do wyświetlenie względem drzewa DOM dla [.js-slider__thumbs]
   let prevImg = currentImg.parentElement.previousElementSibling;
-  // 3. sprawdzić czy ten element istnieje i czy nie posiada klasy [.js-slider__thumbs-item--prototype]
   while (
     prevImg !== null &&
     prevImg.classList.contains('js-slider__thumbs-item--prototype')
@@ -177,10 +130,8 @@ const onImagePrev = function () {
     prevImg = thumbs[thumbs.length - 1];
   }
   if (prevImg !== null) {
-    // 4. przełączyć klasę [.js-slider__thumbs-image--current] do odpowiedniego elementu
     currentImg.classList.remove('js-slider__thumbs-image--current');
     prevImg.firstElementChild.classList.add('js-slider__thumbs-image--current');
-    // 5. podmienić atrybut [src] dla [.js-slider__image]
     const mainImg = this.querySelector('.js-slider__image');
     const prevImageSrc = prevImg.firstElementChild.getAttribute('src');
     mainImg.setAttribute('src', prevImageSrc);
@@ -188,11 +139,8 @@ const onImagePrev = function () {
 };
 
 const onClose = function () {
-  // todo:
-  // 1. należy usunać klasę [js-slider--active] dla [.js-slider]
   const sliderElement = document.querySelector('.js-slider');
   sliderElement.classList.remove('js-slider--active');
-  // 2. należy usunać wszystkie dzieci dla [.js-slider__thumbs] pomijając [.js-slider__thumbs-item--prototype]
   const thumbsContainer = document.querySelector('.js-slider__thumbs');
   const sliderItems = document.querySelectorAll('.js-slider__thumbs-item');
   sliderItems.forEach(function (ele) {
@@ -202,3 +150,24 @@ const onClose = function () {
   });
   clearInterval(slider);
 };
+
+// Functions
+function setImageSource(targetImageElement, sourceElement) {
+  const imageSrc = sourceElement.firstElementChild.getAttribute('src');
+  targetImageElement.setAttribute('src', imageSrc);
+}
+
+function setThumbsImageAsCurrent(imageElement) {
+  const currentImg = document.querySelector(
+    '.js-slider__thumbs-image--current'
+  );
+
+  if (currentImg) {
+    currentImg.classList.remove('js-slider__thumbs-image--current');
+  }
+
+  imageElement.classList.add('js-slider__thumbs-image--current');
+
+  const nextImageSrc = imageElement.getAttribute('src');
+  document.querySelector('.js-slider__image').setAttribute('src', nextImageSrc);
+}
