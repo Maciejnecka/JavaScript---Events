@@ -1,4 +1,3 @@
-let sliderInterval;
 const init = function () {
   const imagesList = document.querySelectorAll('.gallery__item');
   imagesList.forEach((img) => {
@@ -30,15 +29,31 @@ const initEvents = function (imagesList, sliderRootElement) {
   const navNext = sliderRootElement.querySelector('.js-slider__nav--next');
   navNext.addEventListener('click', function (e) {
     fireCustomEvent(e.currentTarget, 'js-slider-img-next');
-    navNext.addEventListener('mouseenter', pauseSliderInterval);
-    navNext.addEventListener('mouseleave', startSliderInterval);
   });
+  // Slider listeners
+  const navNextSlider = sliderRootElement.querySelector(
+    '.js-slider__nav--next'
+  );
+  navNextSlider.addEventListener('click', function (e) {
+    fireCustomEvent(e.currentTarget, 'js-slider-img-next');
+  });
+  navNextSlider.addEventListener('mouseenter', pauseSliderInterval);
+  navNextSlider.addEventListener('mouseleave', resumeSliderInterval);
+
   const navPrev = sliderRootElement.querySelector('.js-slider__nav--prev');
   navPrev.addEventListener('click', function (e) {
     fireCustomEvent(e.currentTarget, 'js-slider-img-prev');
-    navPrev.addEventListener('mouseenter', pauseSliderInterval);
-    navPrev.addEventListener('mouseleave', startSliderInterval);
   });
+  // Slider listeners
+  const navPrevSlider = sliderRootElement.querySelector(
+    '.js-slider__nav--prev'
+  );
+  navPrevSlider.addEventListener('click', function (e) {
+    fireCustomEvent(e.currentTarget, 'js-slider-img-prev');
+  });
+  navPrevSlider.addEventListener('mouseenter', pauseSliderInterval);
+  navPrevSlider.addEventListener('mouseleave', resumeSliderInterval);
+
   const zoom = sliderRootElement.querySelector('.js-slider__zoom');
   zoom.addEventListener('click', function (e) {
     if (e.target === zoom) {
@@ -95,7 +110,7 @@ const onImageClick = function (event, sliderRootElement, imagesSelector) {
       }
     }
   });
-  startSliderInterval();
+  startImageSlider();
 };
 
 const onImageNext = function () {
@@ -112,7 +127,6 @@ const onImageNext = function () {
     const nextImg = nextEle.firstElementChild;
     setThumbsImageAsCurrent(nextImg);
   }
-  pauseSliderInterval();
 };
 
 const onImagePrev = function () {
@@ -121,14 +135,13 @@ const onImagePrev = function () {
   if (prevImg) {
     setThumbsImageAsCurrent(prevImg);
   }
-  pauseSliderInterval();
 };
 
 const onClose = function () {
   const sliderElement = document.querySelector('.js-slider');
   sliderElement.classList.remove('js-slider--active');
   removeThumbs();
-  clearInterval(sliderInterval);
+  stopImageSlider();
 };
 
 // //////////////////////////////////////////////////////////
@@ -189,13 +202,21 @@ function removeThumbs() {
   });
 }
 
-// Auto-slider function
-function startSliderInterval() {
-  if (!sliderInterval) {
-    sliderInterval = setInterval(onImageNext, 2500);
-  }
+let sliderInterval;
+
+function startImageSlider() {
+  clearInterval(sliderInterval);
+  sliderInterval = setInterval(onImageNext, 2500);
+}
+
+function stopImageSlider() {
+  clearInterval(sliderInterval);
 }
 
 function pauseSliderInterval() {
   clearInterval(sliderInterval);
+}
+
+function resumeSliderInterval() {
+  startImageSlider();
 }
