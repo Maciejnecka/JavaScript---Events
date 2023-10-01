@@ -31,28 +31,16 @@ const initEvents = function (imagesList, sliderRootElement) {
     fireCustomEvent(e.currentTarget, 'js-slider-img-next');
   });
   // Slider listeners
-  const navNextSlider = sliderRootElement.querySelector(
-    '.js-slider__nav--next'
-  );
-  navNextSlider.addEventListener('click', function (e) {
-    fireCustomEvent(e.currentTarget, 'js-slider-img-next');
-  });
-  navNextSlider.addEventListener('mouseenter', pauseSliderInterval);
-  navNextSlider.addEventListener('mouseleave', resumeSliderInterval);
+  navNext.addEventListener('mouseenter', stopImageSlider);
+  navNext.addEventListener('mouseleave', startImageSlider);
 
   const navPrev = sliderRootElement.querySelector('.js-slider__nav--prev');
   navPrev.addEventListener('click', function (e) {
     fireCustomEvent(e.currentTarget, 'js-slider-img-prev');
   });
-  // Slider listeners
-  const navPrevSlider = sliderRootElement.querySelector(
-    '.js-slider__nav--prev'
-  );
-  navPrevSlider.addEventListener('click', function (e) {
-    fireCustomEvent(e.currentTarget, 'js-slider-img-prev');
-  });
-  navPrevSlider.addEventListener('mouseenter', pauseSliderInterval);
-  navPrevSlider.addEventListener('mouseleave', resumeSliderInterval);
+  // slider listeners
+  navPrev.addEventListener('mouseenter', stopImageSlider);
+  navPrev.addEventListener('mouseleave', startImageSlider);
 
   const zoom = sliderRootElement.querySelector('.js-slider__zoom');
   zoom.addEventListener('click', function (e) {
@@ -211,12 +199,4 @@ function startImageSlider() {
 
 function stopImageSlider() {
   clearInterval(sliderInterval);
-}
-
-function pauseSliderInterval() {
-  clearInterval(sliderInterval);
-}
-
-function resumeSliderInterval() {
-  startImageSlider();
 }
