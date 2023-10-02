@@ -94,7 +94,9 @@ const onImageClick = function (event, sliderRootElement, imagesSelector) {
         el.firstElementChild.getAttribute('src') ===
         currentImg.getAttribute('src')
       ) {
-        thumbImg.classList.add('js-slider__thumbs-image--current');
+        thumbImg
+          .querySelector('img')
+          .classList.add('js-slider__thumbs-image--current');
       }
     }
   });
